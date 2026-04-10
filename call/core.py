@@ -7,27 +7,27 @@ from pathlib import Path
 from typing import Any, get_args, get_origin, get_type_hints
 
 
-class JustError(Exception):
+class CallError(Exception):
     """Base error for framework-level failures."""
 
 
-class CommandRegistrationError(JustError):
+class CommandRegistrationError(CallError):
     """Raised when a function signature cannot be supported."""
 
 
-class CommandNotFoundError(JustError):
+class CommandNotFoundError(CallError):
     """Raised when the requested command is not registered."""
 
 
-class ArgumentParseError(JustError):
+class ArgumentParseError(CallError):
     """Raised when CLI tokens cannot be parsed."""
 
 
-class MissingArgumentsError(JustError):
+class MissingArgumentsError(CallError):
     """Raised when a command is missing required arguments."""
 
 
-class TypeCoercionError(JustError):
+class TypeCoercionError(CallError):
     """Raised when a CLI value cannot be coerced to a parameter type."""
 
 
@@ -133,7 +133,7 @@ class CommandRegistry:
 registry = CommandRegistry()
 
 
-def please(func: Any) -> Any:
+def call(func: Any) -> Any:
     return registry.register(func)
 
 

@@ -1,16 +1,16 @@
-from please import please
+from call import call
 
 
-@please
+@call
 def sum(a: int, b: int) -> None:
     print(a + b)
 
 
-@please
+@call
 def greet(name: str, title: str = "friend") -> None:
     print(f"Hello, {title} {name}")
 
 
-@please
+@call
 def divide(a: float, b: float) -> None:
     print(a / b)

@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from .core import (
-    JustError,
+    CallError,
     bind_command,
     build_context,
     parse_argv,
@@ -17,8 +17,8 @@ from .core import (
 )
 
 
-DEFAULT_MODULES = ("please.examples.commands",)
-MODULES_FILE = "PLEASE_MODULES"
+DEFAULT_MODULES = ("call.examples.commands",)
+MODULES_FILE = "CALL_MODULES"
 
 
 class Tee(io.TextIOBase):
@@ -50,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
         parsed = parse_argv(command_argv)
         context = build_context(command_name, command_argv, parsed)
         args, kwargs = bind_command(command, parsed, context)
-    except JustError as exc:
+    except CallError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
@@ -67,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
 
 def load_modules() -> None:
     module_refs = list(DEFAULT_MODULES)
-    module_refs.extend(_modules_from_env_var(os.environ.get("PLEASE_MODULES", "")))
+    module_refs.extend(_modules_from_env_var(os.environ.get("CALL_MODULES", "")))
     module_refs.extend(_modules_from_files(Path.cwd()))
 
     seen = set()
@@ -124,7 +124,7 @@ def _import_module_ref(module_ref: str) -> None:
 
 def _import_module_from_path(path: Path) -> None:
     resolved = path.resolve()
-    module_name = f"please_dynamic_{abs(hash(str(resolved)))}"
+    module_name = f"call_dynamic_{abs(hash(str(resolved)))}"
     spec = importlib.util.spec_from_file_location(module_name, resolved)
     if spec is None or spec.loader is None:
         raise ImportError(f"Cannot load module from path: {resolved}")
@@ -150,7 +150,7 @@ def maybe_log(log_file: str | None):
 
 def _print_usage() -> None:
     available = ", ".join(name for name, _ in sorted(registry.items())) or "none"
-    print("Usage: please <COMMAND> <ARGS> [--log <file>]", file=sys.stderr)
+    print("Usage: call <COMMAND> <ARGS> [--log <file>]", file=sys.stderr)
     print(f"Available commands: {available}", file=sys.stderr)
 
 

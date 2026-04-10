@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "please-python"
+name = "call-python"
 version = "0.1.0"
 description = "A small decorator-based Python CLI runner."
 readme = "README.md"
@@ -11,7 +11,7 @@ requires-python = ">=3.13"
 dependencies = []
 
 [project.scripts]
-please = "please.cli:main"
+call = "call.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["please", "please.*"]
+include = ["call", "call.*"]

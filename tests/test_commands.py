@@ -14,13 +14,13 @@ ROOT = Path(__file__).resolve().parents[1]
 def run_cli(*args: str, extra_env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(ROOT)
-    env["PLEASE_MODULES"] = "tests.test_commands_support"
+    env["CALL_MODULES"] = "tests.test_commands_support"
     cwd = ROOT
     if extra_env:
-        cwd = Path(extra_env.pop("PLEASE_CWD", cwd))
+        cwd = Path(extra_env.pop("CALL_CWD", cwd))
         env.update(extra_env)
     return subprocess.run(
-        [sys.executable, "-m", "please.cli", *args],
+        [sys.executable, "-m", "call.cli", *args],
         cwd=cwd,
         capture_output=True,
         text=True,
@@ -29,7 +29,7 @@ def run_cli(*args: str, extra_env: dict[str, str] | None = None) -> subprocess.C
     )
 
 
-class JustCliTests(unittest.TestCase):
+class CallCliTests(unittest.TestCase):
     def test_positional_args(self) -> None:
         result = run_cli("add", "1", "2")
         self.assertEqual(result.returncode, 0)
@@ -70,7 +70,7 @@ class JustCliTests(unittest.TestCase):
 
     def test_log_redirection(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            log_path = Path(tmpdir) / "please.log"
+            log_path = Path(tmpdir) / "call.log"
             result = run_cli("emit", "hello", "--log", str(log_path))
             self.assertEqual(result.returncode, 0)
             self.assertIn("OUT: hello", result.stdout)
@@ -83,13 +83,13 @@ class JustCliTests(unittest.TestCase):
     def test_modules_file_in_cwd_is_loaded(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
-            (tmp_path / "PLEASE_MODULES").write_text("tests.test_commands_support\n", encoding="utf-8")
+            (tmp_path / "CALL_MODULES").write_text("tests.test_commands_support\n", encoding="utf-8")
 
             result = run_cli(
                 "add",
                 "1",
                 "2",
-                extra_env={"PLEASE_MODULES": "", "PLEASE_CWD": str(tmp_path)},
+                extra_env={"CALL_MODULES": "", "CALL_CWD": str(tmp_path)},
             )
 
             self.assertEqual(result.returncode, 0)
@@ -100,13 +100,13 @@ class JustCliTests(unittest.TestCase):
             tmp_path = Path(tmpdir)
             nested = tmp_path / "one" / "two"
             nested.mkdir(parents=True)
-            (tmp_path / "PLEASE_MODULES").write_text("tests.test_commands_support\n", encoding="utf-8")
+            (tmp_path / "CALL_MODULES").write_text("tests.test_commands_support\n", encoding="utf-8")
 
             result = run_cli(
                 "add",
                 "1",
                 "2",
-                extra_env={"PLEASE_MODULES": "", "PLEASE_CWD": str(nested)},
+                extra_env={"CALL_MODULES": "", "CALL_CWD": str(nested)},
             )
 
             self.assertEqual(result.returncode, 0)
@@ -118,18 +118,18 @@ class JustCliTests(unittest.TestCase):
             module_path = tmp_path / "commands" / "custom.py"
             module_path.parent.mkdir(parents=True)
             module_path.write_text(
-                "from please import please\n\n"
-                "@please\n"
+                "from call import call\n\n"
+                "@call\n"
                 "def triple(value: int) -> None:\n"
                 "    print(value * 3)\n",
                 encoding="utf-8",
             )
-            (tmp_path / "PLEASE_MODULES").write_text("commands/custom.py\n", encoding="utf-8")
+            (tmp_path / "CALL_MODULES").write_text("commands/custom.py\n", encoding="utf-8")
 
             result = run_cli(
                 "triple",
                 "7",
-                extra_env={"PLEASE_MODULES": "", "PLEASE_CWD": str(tmp_path)},
+                extra_env={"CALL_MODULES": "", "CALL_CWD": str(tmp_path)},
             )
 
             self.assertEqual(result.returncode, 0)
